@@ -1,0 +1,33 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+BOX_RAM_MB = 1024
+
+Vagrant.configure("2") do |config|
+    config.vm.box = "hashicorp/bionic64"
+    config.vm.box_version = "1.0.282"
+
+    # Define NFS server machine
+    config.vm.define "server" do |server|
+        server.vm.hostname = "NFSServer"
+        server.vm.network "public_network", bridge: "wlp7s0"
+        server.vm.network "private_network", ip: "192.168.10.10"
+        server.vm.provision "shell", privileged: true, path: "server.sh"
+        server.vm.provider "virtualbox" do |vb|
+            vb.name = "nfs-server"
+            vb.memory = BOX_RAM_MB
+        end
+    end
+
+    # Define NFS client machine
+    config.vm.define "client" do |client|
+        client.vm.hostname = "NFSClient"
+        client.vm.network "public_network", bridge: "wlp7s0"
+        client.vm.network "private_network", ip: "192.168.10.11"
+        client.vm.provision "shell", privileged: true, path: "client.sh"
+        client.vm.provider "virtualbox" do |vb|
+            vb.name = "nfs-client"
+            vb.memory = BOX_RAM_MB
+        end
+    end
+end
